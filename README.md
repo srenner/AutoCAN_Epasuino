@@ -8,6 +8,15 @@ Typical aftermarket electric power assist steering (EPAS) kits for automobiles u
 ## User Interface
 The user will use a 6 way rotary switch to control the base amount of steering assitance.
 
+| Knob Position | 0mph | 30mph | 60mph | Setting Name |
+|---------------|------|-------|-------|--------------|
+| 1             | 0%   | 0%    | 0%    | Manual       |
+| 2             | 75%  | 25%   | 0%    | Firm         |
+| 3             | 100% | 25%   | 25%   | Sport+       |
+| 4             | 100% | 50%   | 50%   | Sport        |
+| 5             | 100% | 100%  | 50%   | Touring      |
+| 6             | 100% | 100%  | 100%  | Comfort      |
+
 ## Hardware details
 * [SparkFun AST-CAN485 Dev Board](https://www.sparkfun.com/products/14483)
 * 100k ohm digital potentiometer
