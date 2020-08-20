@@ -16,7 +16,7 @@ The EPAS control module will smooth out and delay large changes to the assist le
 | 2             | 50%  | 25%   | 0%    | Firm         |
 | 3             | 75%  | 25%   | 25%   | Sport+       |
 | 4             | 100% | 50%   | 50%   | Sport        |
-| 5             | 100% | 100%  | 50%   | Touring      |
+| 5             | 100% | 75%   | 50%   | Touring      |
 | 6             | 100% | 100%  | 100%  | Comfort      |
 
 ## Hardware details
