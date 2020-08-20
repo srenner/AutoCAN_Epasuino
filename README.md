@@ -8,7 +8,7 @@ Typical aftermarket electric power assist steering (EPAS) kits for automobiles u
 ## User Interface
 The user will use a 6 way rotary switch to control the base amount of steering assitance. A System Message will be sent on the CAN bus every time the knob is turned to a different position. 
 
-The EPAS control module will smooth out and delay large changes to the assist level, which makes precise speed-sensitive adjustments in the piggyback module essentially impossible to implement. Therefore, the algorithm has been simplified to be in 30mph and 25% increments.
+The EPAS control module will smooth out and delay large changes to the assist level, which makes precise speed-sensitive adjustments in the piggyback module essentially impossible to implement. Therefore, the algorithm has been simplified to be in 30mph and 25% increments, with a 5mph deadband.
 
 | Knob Position | 0mph | 30mph | 60mph | Setting Name |
 |---------------|------|-------|-------|--------------|
