@@ -26,6 +26,9 @@ unsigned long lastMillis = 0;                               //used to cut time i
 byte oldAssistValue = 0;
 byte newAssistValue = 0;
 
+float currentMph = 0.0;
+float previousMph = 0.0;
+
 //can bus variables ////////////////////////////////////////////////////////////
 
 uint8_t canBuffer[8] = {};
@@ -76,6 +79,19 @@ st_cmd_t txMsg;
 uint8_t txBuffer[8] = {0,0,0,0,0,0,0,0};
 
 unsigned long vssCanTest = 0;
+
+uint8_t assistOutput[6][3] = {
+  {0, 0, 0},
+  {50, 25, 0},
+  {75, 25, 25},
+  {100, 50, 50},
+  {100, 75, 50},
+  {100, 100, 100}
+};
+uint8_t currentAssistOutput = 100;
+
+float vss = 0.0;
+float previousVss = 0.0;
 
 ISR(CANIT_vect) {
   canCount++;
@@ -252,15 +268,18 @@ void loop() {
     
     noInterrupts();
     processCanMessages();
-    float mph = engine_spd.currentValue;
-    float vss = engine_vss.currentValue;
+    previousMph = currentMph;
+    currentMph = engine_spd.currentValue;
+    previousVss = vss;
+    vss = engine_vss.currentValue;
     interrupts();
 
-    if(vss > 0.0 && DEBUG_MPH)
+    if(currentMph != previousMph && DEBUG_MPH)
     {
-      Serial.print(mph);
-      Serial.print(" ");
-      Serial.println(vss);
+      Serial.print(currentMph);
+      Serial.println("mph");
+      //Serial.print(" ");
+      //Serial.println(vss);
     }
 
     //calculate assist level
@@ -271,29 +290,39 @@ void loop() {
         Serial.print("new assist mode: ");
         Serial.print(newAssistMode);
         Serial.print(" - ");
-        Serial.println(epasModeDescriptions[newAssistMode-1]);
+        Serial.println(epasModeDescriptions[newAssistMode]);
       }
       assistMode = newAssistMode;
-      sendToCan(assistMode-1);
+      sendToCan(assistMode);
+    }
+
+    uint8_t previousAssistOutput = currentAssistOutput;
+    currentAssistOutput = getDesiredAssistLevel(assistMode, currentMph);
+
+    if(previousAssistOutput != currentAssistOutput)
+    {
+      Serial.print("assist: ");
+      Serial.print(currentAssistOutput);
+      Serial.println("%");
     }
 
     switch(assistMode) {
-      case 1:
+      case 0:
         //newAssistValue = calculateMode1(mph);
         break;
-      case 2:
+      case 1:
         //newAssistValue = calculateMode2(mph);
         break;
-      case 3:
+      case 2:
         //newAssistValue = calculateMode3(mph);
         break;
-      case 4:
+      case 3:
         //newAssistValue = calculateMode4(mph);
         break;
-      case 5:
+      case 4:
         //newAssistValue = calculateMode5(mph);
         break;
-      case 6:
+      case 5:
         //newAssistValue = calculateMode6(mph);
         break;
     }
@@ -307,6 +336,21 @@ void loop() {
   }
 }
 
+uint8_t getDesiredAssistLevel(uint8_t mode, float mph)
+{
+  uint8_t speedZone = 0;
+  if(mph > 29.9)
+  {
+    speedZone = 1;
+  }
+  if(mph > 59.9)
+  {
+    speedZone = 2;
+  }
+
+  return assistOutput[mode][speedZone];
+}
+
 void processCanMessages()
 {
     engine_vss.currentValue = ((allCanMessages[MSG_MS_PLUS4]->data[0] * 256) + allCanMessages[MSG_MS_PLUS4]->data[1]) / 10.0;
@@ -317,22 +361,22 @@ void processCanMessages()
 byte getMode(byte previousMode) {
   byte mode = previousMode;
   if(!digitalRead(POS_1_PIN)) {
-    mode = 1;
+    mode = 0;
   }
   else if(!digitalRead(POS_2_PIN)) {
-    mode = 2;
+    mode = 1;
   }
   else if(!digitalRead(POS_3_PIN)) {
-    mode = 3;
+    mode = 2;
   }
   else if(!digitalRead(POS_4_PIN)) {
-    mode = 4;
+    mode = 3;
   }
   else if(!digitalRead(POS_5_PIN)) {
-    mode = 5;
+    mode = 4;
   }
   else if(!digitalRead(POS_6_PIN)) {
-    mode = 6;
+    mode = 5;
   }
   return mode;
 }
