@@ -93,6 +93,17 @@ uint8_t currentAssistOutput = 100;
 float vss = 0.0;
 float previousVss = 0.0;
 
+//0
+
+enum speedZone {
+  zeroToThirty  = 0,
+  thirtyToSixty = 1,
+  overSixty     = 2
+};
+
+speedZone currentSpeedZone = zeroToThirty;
+speedZone previousSpeedZone = zeroToThirty;
+
 ISR(CANIT_vect) {
   canCount++;
 
@@ -338,17 +349,36 @@ void loop() {
 
 uint8_t getDesiredAssistLevel(uint8_t mode, float mph)
 {
+  previousSpeedZone = currentSpeedZone;
   uint8_t speedZone = 0;
-  if(mph > 29.9)
+  if(mph < 30)
   {
-    speedZone = 1;
+    if(previousSpeedZone == thirtyToSixty && mph >= 25.0)
+    {
+      currentSpeedZone = thirtyToSixty;
+    }
+    else
+    {
+      currentSpeedZone = zeroToThirty;
+    }
   }
-  if(mph > 59.9)
+  if(mph >= 30.0)
   {
-    speedZone = 2;
+    if(previousSpeedZone == overSixty && mph >= 55.0)
+    {
+      currentSpeedZone = overSixty;
+    }
+    else
+    {
+      currentSpeedZone = thirtyToSixty;
+    }
+  }
+  if(mph >= 60.0)
+  {
+    currentSpeedZone = overSixty;
   }
 
-  return assistOutput[mode][speedZone];
+  return assistOutput[mode][currentSpeedZone];
 }
 
 void processCanMessages()
@@ -386,10 +416,11 @@ float getSpeed() {
   return 0.0;
 }
 
-void sendToPot(byte pos) {
+void sendToPot(uint8_t percent) {
   if(DEBUG_KNOB) {
     Serial.print("setting digital knob to position ");
-    Serial.println(pos);  
+    Serial.print(percent);
+    Serial.println("%");  
   }
   //todo
 }
