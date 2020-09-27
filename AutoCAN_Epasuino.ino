@@ -271,6 +271,7 @@ void loop() {
       Serial.print(" - ");
       Serial.println(epasModeDescriptions[newAssistMode-1]);
       assistMode = newAssistMode;
+      sendToCan(assistMode-1);
     }
 
     switch(assistMode) {
@@ -346,6 +347,25 @@ void sendToPot(byte pos) {
   //todo
 }
 
-void sendToCan() {
-  //send steering mode to the CAN bus in case anyone needs to read the status
+//send steering mode to the CAN bus in case anyone needs to read the status
+void sendToCan(byte modeIndex) {
+
+  txBuffer[0] = modeIndex;
+  
+  // Setup CAN packet.
+  txMsg.ctrl.ide = MESSAGE_PROTOCOL;    // Set CAN protocol (0: CAN 2.0A, 1: CAN 2.0B)
+  txMsg.id.std   = CAN_EPAS_MSG_ID;     // Set message ID
+  txMsg.dlc      = MESSAGE_LENGTH;      // Data length: 8 bytes
+  txMsg.ctrl.rtr = MESSAGE_RTR;         // Set rtr bit
+  txMsg.pt_data = &txBuffer[0];         // reference message data to transmit buffer
+
+  // Send command to the CAN port controller
+  txMsg.cmd = CMD_TX_DATA;       // send message
+  // Wait for the command to be accepted by the controller
+  while(can_cmd(&txMsg) != CAN_CMD_ACCEPTED);
+  //Serial.println("command accepted?");
+  // Wait for command to finish executing
+  while(can_get_status(&txMsg) == CAN_STATUS_NOT_COMPLETED);
+  //Serial.println("send complete?");
+
 }
