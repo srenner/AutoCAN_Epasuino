@@ -1,9 +1,10 @@
 //datasheet at https://github.com/Atlantis-Specialist-Technologies/CAN485/blob/master/Documentation/Datasheet%20AT90CANXX.pdf
 #include <ASTCanLib.h>
 #include <math.h>
+#include <AutoCAN.h>
 
 #define DEBUG_KNOB true
-#define DEBUG_MPH false
+#define DEBUG_MPH true
 
 //pins used on board
 byte const POS_1_PIN = 2;
@@ -26,7 +27,7 @@ byte newAssistValue = 0;
 
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(1000000);
   pinMode(POS_1_PIN, INPUT_PULLUP);
   pinMode(POS_2_PIN, INPUT_PULLUP);
   pinMode(POS_3_PIN, INPUT_PULLUP);
@@ -48,7 +49,9 @@ void loop() {
     byte newAssistMode = getMode(assistMode);
     if(newAssistMode != assistMode) {
       Serial.print("new assist mode: ");
-      Serial.println(newAssistMode);
+      Serial.print(newAssistMode);
+      Serial.print(" - ");
+      Serial.println(epasModeDescriptions[newAssistMode-1]);
       assistMode = newAssistMode;
     }
 
