@@ -256,7 +256,7 @@ void loop() {
     float vss = engine_vss.currentValue;
     interrupts();
 
-    if(mph > 0.0)
+    if(vss > 0.0 && DEBUG_MPH)
     {
       Serial.print(mph);
       Serial.print(" ");
@@ -266,10 +266,13 @@ void loop() {
     //calculate assist level
     byte newAssistMode = getMode(assistMode);
     if(newAssistMode != assistMode) {
-      Serial.print("new assist mode: ");
-      Serial.print(newAssistMode);
-      Serial.print(" - ");
-      Serial.println(epasModeDescriptions[newAssistMode-1]);
+      if(DEBUG_KNOB)
+      {
+        Serial.print("new assist mode: ");
+        Serial.print(newAssistMode);
+        Serial.print(" - ");
+        Serial.println(epasModeDescriptions[newAssistMode-1]);
+      }
       assistMode = newAssistMode;
       sendToCan(assistMode-1);
     }
