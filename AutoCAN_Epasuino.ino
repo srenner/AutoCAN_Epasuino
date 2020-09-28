@@ -317,27 +317,6 @@ void loop() {
       Serial.println("%");
     }
 
-    switch(assistMode) {
-      case 0:
-        //newAssistValue = calculateMode1(mph);
-        break;
-      case 1:
-        //newAssistValue = calculateMode2(mph);
-        break;
-      case 2:
-        //newAssistValue = calculateMode3(mph);
-        break;
-      case 3:
-        //newAssistValue = calculateMode4(mph);
-        break;
-      case 4:
-        //newAssistValue = calculateMode5(mph);
-        break;
-      case 5:
-        //newAssistValue = calculateMode6(mph);
-        break;
-    }
-
     if(newAssistValue != oldAssistValue) {
       sendToPot(newAssistValue);
       oldAssistValue = newAssistValue;
