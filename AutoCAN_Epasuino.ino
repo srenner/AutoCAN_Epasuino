@@ -2,6 +2,7 @@
 #include <ASTCanLib.h>
 #include <math.h>
 #include <AutoCAN.h>
+#include <SPI.h>
 
 #define DEBUG_KNOB true
 #define DEBUG_MPH true
@@ -28,6 +29,34 @@ byte newAssistValue = 0;
 
 float currentMph = 0.0;
 float previousMph = 0.0;
+
+//digital pot variables ////////////////////////////////////////////////////////
+
+/***********************PIN Definitions*************************/
+
+const int CS_PIN = 10;
+const int MOSI_PIN = 11;
+const int CLK_PIN = 13;
+
+/***********************MCP42XXX Commands************************/
+//potentiometer select byte
+const int POT0_SEL = 0x11;
+const int POT1_SEL = 0x12;
+const int BOTH_POT_SEL = 0x13;
+
+//shutdown the device to put it into power-saving mode.
+//In this mode, terminal A is open-circuited and the B and W terminals are shorted together.
+//send new command and value to exit shutdowm mode.
+const int POT0_SHUTDOWN = 0x21;
+const int POT1_SHUTDOWN = 0x22;
+const int BOTH_POT_SHUTDOWN = 0x23;
+
+/***********************Customized Varialbes**********************/
+//resistance value byte (0 - 255)
+//The wiper is reset to the mid-scale position upon power-up, i.e. POT0_Dn = POT1_Dn = 128
+int POT0_Dn = 128;
+int POT1_Dn = 128;
+int BOTH_POT_Dn = 128;
 
 //can bus variables ////////////////////////////////////////////////////////////
 
@@ -186,7 +215,18 @@ void setup() {
   pinMode(POS_5_PIN, INPUT_PULLUP);
   pinMode(POS_6_PIN, INPUT_PULLUP);
   
-#pragma region setup can bus
+  //setup digital potentiometer
+  pinMode(CS_PIN, OUTPUT);
+  pinMode(CLK_PIN, OUTPUT);
+  pinMode(MOSI_PIN, OUTPUT);
+  //SPI.begin();
+  /* Set MOSI and SCK output, all others input */
+  //DDRB = (1<<DDB2)|(1<<DDB1);
+  /* Enable SPI, Master, set clock rate fck/16 */
+  SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
+
+
+  #pragma region setup can bus
 
   txMsg.pt_data = &txBuffer[0];      // reference message data to transmit buffer
 
@@ -274,7 +314,6 @@ void setup() {
 
 void loop() {
   currentMillis = millis();
-  
   if(true) {
     
     noInterrupts();
@@ -315,6 +354,9 @@ void loop() {
       Serial.print("assist: ");
       Serial.print(currentAssistOutput);
       Serial.println("%");
+
+      sendToPot(currentAssistOutput);
+
     }
 
     if(newAssistValue != oldAssistValue) {
@@ -396,12 +438,30 @@ float getSpeed() {
 }
 
 void sendToPot(uint8_t percent) {
+
+  byte val = map(percent, 0, 100, 0, 255);
+
   if(DEBUG_KNOB) {
     Serial.print("setting digital knob to position ");
     Serial.print(percent);
-    Serial.println("%");  
+    Serial.print("%, val: ");
+    Serial.println(val);
   }
-  //todo
+
+  digitalWrite(CS_PIN, LOW);
+
+  SPDR = POT0_SEL;
+  /* Wait for transmission complete */
+  while(!(SPSR & (1<<SPIF)));
+
+  SPDR = val;
+  /* Wait for transmission complete */
+  while(!(SPSR & (1<<SPIF)));
+
+
+  //SPI.transfer(POT0_SEL);
+  //SPI.transfer(val);
+  digitalWrite(CS_PIN, HIGH);
 }
 
 //send steering mode to the CAN bus in case anyone needs to read the status
