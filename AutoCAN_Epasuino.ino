@@ -23,10 +23,6 @@ byte assistMode = 5;                                        //
 unsigned long currentMillis = 0;                            //now
 unsigned long lastMillis = 0;                               //used to cut time into slices of SPEED_CALC_INTERVAL
 
-
-byte oldAssistValue = 0;
-byte newAssistValue = 0;
-
 float currentMph = 0.0;
 float previousMph = 0.0;
 
@@ -356,14 +352,8 @@ void loop() {
       Serial.println("%");
 
       sendToPot(currentAssistOutput);
-
     }
-
-    if(newAssistValue != oldAssistValue) {
-      sendToPot(newAssistValue);
-      oldAssistValue = newAssistValue;
-    }
-    
+    sendAssistToCan(currentAssistOutput);    
     lastMillis = currentMillis;
   }
 }
@@ -480,9 +470,25 @@ void sendToCan(byte modeIndex) {
   txMsg.cmd = CMD_TX_DATA;       // send message
   // Wait for the command to be accepted by the controller
   while(can_cmd(&txMsg) != CAN_CMD_ACCEPTED);
-  //Serial.println("command accepted?");
   // Wait for command to finish executing
   while(can_get_status(&txMsg) == CAN_STATUS_NOT_COMPLETED);
-  //Serial.println("send complete?");
+}
 
+void sendAssistToCan(byte assist)
+{
+  txBuffer[0] = assist;
+  
+  // Setup CAN packet.
+  txMsg.ctrl.ide = MESSAGE_PROTOCOL;    // Set CAN protocol (0: CAN 2.0A, 1: CAN 2.0B)
+  txMsg.id.std   = CAN_EPAS_PCT_MSG_ID; // Set message ID
+  txMsg.dlc      = MESSAGE_LENGTH;      // Data length: 8 bytes
+  txMsg.ctrl.rtr = MESSAGE_RTR;         // Set rtr bit
+  txMsg.pt_data = &txBuffer[0];         // reference message data to transmit buffer
+
+  // Send command to the CAN port controller
+  txMsg.cmd = CMD_TX_DATA;       // send message
+  // Wait for the command to be accepted by the controller
+  while(can_cmd(&txMsg) != CAN_CMD_ACCEPTED);
+  // Wait for command to finish executing
+  while(can_get_status(&txMsg) == CAN_STATUS_NOT_COMPLETED);
 }
