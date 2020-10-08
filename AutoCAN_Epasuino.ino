@@ -405,7 +405,7 @@ uint8_t getDesiredAssistLevel(uint8_t mode, float mph)
 void processCanMessages()
 {
     engine_vss.currentValue = ((allCanMessages[MSG_MS_PLUS4]->data[0] * 256) + allCanMessages[MSG_MS_PLUS4]->data[1]) / 10.0;
-    engine_spd.currentValue = ((canSpd.data[0] * 256) + canSpd.data[1]) / 10.0;
+    engine_spd.currentValue = ((canSpd.data[1] * 256) + canSpd.data[0]) / 10.0;
     
 }
 
