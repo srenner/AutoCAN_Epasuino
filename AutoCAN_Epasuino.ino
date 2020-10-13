@@ -9,17 +9,17 @@
 #define DEBUG_CAN true
 
 //pins used on board
-byte const POS_1_PIN = 2;
-byte const POS_2_PIN = 3;
-byte const POS_3_PIN = 4;
-byte const POS_4_PIN = 5;
-byte const POS_5_PIN = 6;
-byte const POS_6_PIN = 7;
+uint8_t const POS_1_PIN = 2;
+uint8_t const POS_2_PIN = 3;
+uint8_t const POS_3_PIN = 4;
+uint8_t const POS_4_PIN = 5;
+uint8_t const POS_5_PIN = 6;
+uint8_t const POS_6_PIN = 7;
 
 //other constants
-byte const KNOB_BUFFER_LENGTH = 255;                        //length of potentiometer buffer
+uint8_t const KNOB_BUFFER_LENGTH = 255;                        //length of potentiometer buffer
 
-byte assistMode = 5;                                        //
+uint8_t assistMode = 5;                                        //
 unsigned long currentMillis = 0;                            //now
 unsigned long lastMillis = 0;                               //used to cut time into slices of SPEED_CALC_INTERVAL
 
@@ -329,7 +329,7 @@ void loop() {
     }
 
     //calculate assist level
-    byte newAssistMode = getMode(assistMode);
+    uint8_t newAssistMode = getMode(assistMode);
     if(newAssistMode != assistMode) {
       if(DEBUG_KNOB)
       {
@@ -399,8 +399,8 @@ void processCanMessages()
     
 }
 
-byte getMode(byte previousMode) {
-  byte mode = previousMode;
+uint8_t getMode(uint8_t previousMode) {
+  uint8_t mode = previousMode;
   if(!digitalRead(POS_1_PIN)) {
     mode = 0;
   }
@@ -429,7 +429,7 @@ float getSpeed() {
 
 void sendToPot(uint8_t percent) {
 
-  byte val = map(percent, 0, 100, 0, 255);
+  uint8_t val = map(percent, 0, 100, 0, 255);
 
   if(DEBUG_KNOB) {
     Serial.print("setting digital knob to position ");
@@ -455,7 +455,7 @@ void sendToPot(uint8_t percent) {
 }
 
 //send steering mode to the CAN bus in case anyone needs to read the status
-void sendToCan(byte modeIndex) {
+void sendToCan(uint8_t modeIndex) {
 
   txBuffer[0] = modeIndex;
   
@@ -474,7 +474,7 @@ void sendToCan(byte modeIndex) {
   while(can_get_status(&txMsg) == CAN_STATUS_NOT_COMPLETED);
 }
 
-void sendAssistToCan(byte assist)
+void sendAssistToCan(uint8_t assist)
 {
   txBuffer[0] = assist;
   
