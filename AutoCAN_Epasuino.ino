@@ -30,29 +30,29 @@ float previousMph = 0.0;
 
 /***********************PIN Definitions*************************/
 
-const int CS_PIN = 10;
-const int MOSI_PIN = 11;
-const int CLK_PIN = 13;
+const uint8_t CS_PIN = 10;
+const uint8_t MOSI_PIN = 11;
+const uint8_t CLK_PIN = 13;
 
 /***********************MCP42XXX Commands************************/
 //potentiometer select byte
-const int POT0_SEL = 0x11;
-const int POT1_SEL = 0x12;
-const int BOTH_POT_SEL = 0x13;
+const int16_t POT0_SEL = 0x11;
+const int16_t POT1_SEL = 0x12;
+const int16_t BOTH_POT_SEL = 0x13;
 
 //shutdown the device to put it into power-saving mode.
 //In this mode, terminal A is open-circuited and the B and W terminals are shorted together.
 //send new command and value to exit shutdowm mode.
-const int POT0_SHUTDOWN = 0x21;
-const int POT1_SHUTDOWN = 0x22;
-const int BOTH_POT_SHUTDOWN = 0x23;
+const int16_t POT0_SHUTDOWN = 0x21;
+const int16_t POT1_SHUTDOWN = 0x22;
+const int16_t BOTH_POT_SHUTDOWN = 0x23;
 
 /***********************Customized Varialbes**********************/
 //resistance value byte (0 - 255)
 //The wiper is reset to the mid-scale position upon power-up, i.e. POT0_Dn = POT1_Dn = 128
-int POT0_Dn = 128;
-int POT1_Dn = 128;
-int BOTH_POT_Dn = 128;
+uint8_t POT0_Dn = 128;
+uint8_t POT1_Dn = 128;
+uint8_t BOTH_POT_Dn = 128;
 
 //can bus variables ////////////////////////////////////////////////////////////
 
@@ -180,7 +180,7 @@ ISR(CANIT_vect) {
       case CAN_SH_VSS_MSG_ID:
         //vssCounter++;
         canSpd.counter++;
-        for(int i = 0; i < 2; i++)
+        for(uint8_t i = 0; i < 2; i++)
         {
           canSpd.data[i] = canTemp.data[i];
         }       
@@ -192,9 +192,9 @@ ISR(CANIT_vect) {
   }
 }
 
-void fillCanDataBuffer(int index, canData* canTemp)
+void fillCanDataBuffer(uint8_t index, canData* canTemp)
 {
-  for(int i = 0; i < 8; i++)
+  for(uint8_t i = 0; i < 8; i++)
   {
     allCanMessages[index]->data[i] = canTemp->data[i];
   }
